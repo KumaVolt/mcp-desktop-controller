@@ -4,8 +4,6 @@
 
 One MCP server. Ten tools. Your AI can now see your screen and interact with any application, just like you do.
 
-https://github.com/user-attachments/assets/placeholder
-
 ## What can it do?
 
 - **See your screen** — Take full or partial screenshots, auto-optimized for LLM token usage
