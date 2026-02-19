@@ -1,0 +1,22 @@
+[project]
+name = "mcp-desktop-controller"
+version = "0.1.0"
+description = "MCP server for desktop control via mouse, keyboard, and screenshots"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=2.0.0",
+    "pyautogui>=0.9.54",
+    "Pillow>=10.0.0",
+    "pydantic>=2.7.2",
+]
+
+[project.scripts]
+mcp-desktop-controller = "server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+only-include = ["server.py"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
