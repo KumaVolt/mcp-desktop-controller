@@ -1,43 +1,46 @@
 # Desktop Controller MCP Server
 
-An MCP server that gives LLMs full desktop control: mouse, keyboard, screenshots, and screen info. Built with [FastMCP](https://github.com/jlowin/fastmcp) and [PyAutoGUI](https://pyautogui.readthedocs.io/).
+**Give any AI full control of your desktop.** Mouse, keyboard, screenshots — all through the [Model Context Protocol](https://modelcontextprotocol.io/).
+
+One MCP server. Ten tools. Your AI can now see your screen and interact with any application, just like you do.
+
+https://github.com/user-attachments/assets/placeholder
+
+## What can it do?
+
+- **See your screen** — Take full or partial screenshots, auto-optimized for LLM token usage
+- **Move & click** — Navigate, click, double-click, right-click, drag and drop
+- **Type anything** — Full keyboard control including Unicode, emoji, and key combos (Cmd+C, Ctrl+Shift+T, etc.)
+- **Cross-platform** — Works on macOS, Windows, and Linux
 
 ## Tools
 
-| Tool | Description |
+| Tool | What it does |
 |------|-------------|
-| `desktop_get_screen_size` | Get screen dimensions |
-| `desktop_get_mouse_position` | Get current cursor position |
-| `desktop_move_mouse` | Move cursor to absolute or relative position |
-| `desktop_click` | Click at a position (single, double, right-click) |
-| `desktop_scroll` | Scroll the mouse wheel |
+| `desktop_screenshot` | Capture the screen or a region (returns image directly to the LLM) |
+| `desktop_get_screen_size` | Get screen dimensions in logical pixels |
+| `desktop_get_mouse_position` | Get current cursor coordinates |
+| `desktop_move_mouse` | Move cursor (absolute or relative) |
+| `desktop_click` | Click, double-click, or right-click at any position |
+| `desktop_scroll` | Scroll up or down |
 | `desktop_drag` | Drag from one position to another |
-| `desktop_type_text` | Type a text string (supports Unicode via clipboard fallback) |
-| `desktop_press_key` | Press special keys (Enter, Tab, arrows, etc.) |
-| `desktop_hotkey` | Press key combinations (Cmd+C, Ctrl+Shift+T, etc.) |
-| `desktop_screenshot` | Capture the screen or a region (returns image to LLM) |
+| `desktop_type_text` | Type text with full Unicode support |
+| `desktop_press_key` | Press special keys (Enter, Tab, arrows, F1-F12, etc.) |
+| `desktop_hotkey` | Press key combinations (Cmd+C, Ctrl+V, Alt+F4, etc.) |
 
-## Setup
+## Quick Start
 
 ### Install
 
 ```bash
+git clone https://github.com/YOUR_USERNAME/mcp-desktop-controller.git
 cd mcp-desktop-controller
 pip install -e .
 ```
 
-### macOS Permissions
+### Add to Claude Desktop
 
-PyAutoGUI requires two permissions on macOS:
-
-1. **Accessibility**: System Settings > Privacy & Security > Accessibility — add your terminal app (Terminal, iTerm2, VS Code, etc.)
-2. **Screen Recording**: System Settings > Privacy & Security > Screen Recording — add your terminal app (required for screenshots)
-
-You'll be prompted to grant these on first use.
-
-### Claude Desktop Configuration
-
-Add this to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Add to your config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
 ```json
 {
@@ -49,7 +52,8 @@ Add this to your Claude Desktop config (`~/Library/Application Support/Claude/cl
 }
 ```
 
-If you installed with `pip install -e .` in a virtual environment, use the full path:
+<details>
+<summary>Using a virtual environment? Use the full path instead.</summary>
 
 ```json
 {
@@ -61,29 +65,53 @@ If you installed with `pip install -e .` in a virtual environment, use the full 
 }
 ```
 
-## Usage
+</details>
 
-### Run directly
-
-```bash
-python server.py
-```
-
-### Test with MCP Inspector
+### Add to Claude Code
 
 ```bash
-fastmcp dev server.py
+claude mcp add desktop-controller -- mcp-desktop-controller
 ```
 
-### Safety
+### macOS Permissions
 
-- **Failsafe**: Move mouse to top-left corner (0,0) to abort any running action
-- **Pause**: 0.1s pause between all PyAutoGUI actions
-- All coordinates use **logical resolution** (not physical pixels on Retina/HiDPI)
-- Screenshots are **halved by default** to save tokens (`reduce_resolution=True`)
+On first run, you'll need to grant two permissions in **System Settings > Privacy & Security**:
+
+1. **Accessibility** — so the server can control mouse and keyboard
+2. **Screen Recording** — so it can take screenshots
+
+## Safety
+
+- **Failsafe** — Move your mouse to the top-left corner (0,0) to instantly abort any action
+- **Action pause** — 0.1s delay between all actions to keep things predictable
+- **Retina-aware** — All coordinates use logical resolution; screenshots are auto-downscaled to save tokens
+
+## How it works
+
+Built with [FastMCP](https://github.com/jlowin/fastmcp) and [PyAutoGUI](https://pyautogui.readthedocs.io/). The server exposes desktop control as MCP tools over stdio. Any MCP-compatible client (Claude Desktop, Claude Code, or your own) connects and gets full desktop access.
+
+```
+Your AI  ←→  MCP Client  ←→  Desktop Controller  ←→  Your Screen
+```
 
 ## Platform Support
 
-- **macOS**: Full support. Uses `pbcopy` for Unicode text input.
-- **Windows**: Full support. Uses `clip` for Unicode text input.
-- **Linux**: Full support. Requires `xclip` for Unicode text input (`sudo apt install xclip`).
+| Platform | Status | Notes |
+|----------|--------|-------|
+| macOS | Full support | Uses `pbcopy` for Unicode input |
+| Windows | Full support | Uses `clip` for Unicode input |
+| Linux | Full support | Requires `xclip` (`sudo apt install xclip`) |
+
+## Development
+
+```bash
+# Run directly
+python server.py
+
+# Test with MCP Inspector
+fastmcp dev server.py
+```
+
+## License
+
+MIT
